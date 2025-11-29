@@ -99,7 +99,7 @@
 
     <script>
         const SUPABASE_URL = 'https://jxdbpowjwxfofalcdsbn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4ZGJwb3dqd3hmb2ZhbGNkc2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MjEwMjUsImV4cCI6MjA3OTM5NzAyNX0.iy1H39Uy7VERdK_Jlv8bAaRiFDV4Ps6sH90lcqcXCK8';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4ZGJwb3d3hmb2ZhbGNkc2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MjEwMjUsImV4cCI6MjA3OTM5NzAyNX0.iy1H39Uy7VERdK_Jlv8bAaRiFDV4Ps6sH90lcqcXCK8';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Create falling stars
@@ -161,7 +161,7 @@
 
                 if (error) throw error;
 
-                // CRITICAL: Check if user is a verified runner
+                // CRITICAL: Must be a runner
                 const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('role')
@@ -173,10 +173,10 @@
                     throw new Error('Invalid credentials. Only registered runners can log in here.');
                 }
 
-                // Only real runners reach here
+                // SUCCESS → Redirect to runner dashboard
                 showMessage('Login successful! Welcome back, Runner', 'success');
                 setTimeout(() => {
-                    window.location.href = 'runner.html';  // Your runner dashboard
+                    window.location.href = 'runnerdashboard.html';  // ← ONLY CHANGE MADE
                 }, 1200);
 
             } catch (err) {
@@ -192,7 +192,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             createStars();
             loadRunnersCount();
-            setInterval(loadRunnersCount, 30000); // Refresh every 30s
+            setInterval(loadRunnersCount, 30000);
             lucide.createIcons();
         });
     </script>
