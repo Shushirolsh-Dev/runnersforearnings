@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In - Sdel Campus Delivery</title>
+    <title>Runner Login - Sdel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -12,17 +12,12 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #000; color: white; overflow-x: hidden; position: relative; }
-        
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
         .star { position: absolute; background-color: white; border-radius: 50%; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(100vh); } }
-        
-        .card-hover { transition: all 0.3s ease; }
         .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(255,102,0,0.2); }
-        
         .btn-primary { background-color: #FF6600; transition: all 0.3s ease; }
         .btn-primary:hover { background-color: #e55c00; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,102,0,0.4); }
-        
         .form-input {
             background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -33,9 +28,7 @@
             box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
             outline: none;
         }
-        
         .error-message { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
-        .success-message { background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
     </style>
 </head>
 <body>
@@ -43,16 +36,8 @@
     <div class="stars" id="stars"></div>
     
     <!-- Navigation -->
-    <nav class="flex justify-between items-center p-6 bg-black bg-opacity-80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-800">
-        <div class="flex items-center">
-            <a href="index.html" class="flex items-center">
-                <span class="text-2xl font-bold text-white">Sdel</span>
-                <span class="ml-2 text-orange-500 font-semibold">Campus Delivery</span>
-            </a>
-        </div>
-        <div class="flex space-x-4">
-            <a href="signup.html" class="px-4 py-2 border-2 border-orange-500 rounded-lg text-white hover:bg-orange-500/10 transition">Sign Up</a>
-        </div>
+    <nav class="flex justify-center items-center p-6 bg-black bg-opacity-80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-800">
+        <a href="index.html" class="text-2xl font-bold text-white">Sdel</a>
     </nav>
     
     <!-- Login Section -->
@@ -61,7 +46,7 @@
             <div class="bg-gray-900 rounded-2xl p-8 card-hover border border-gray-800">
                 <div class="text-center mb-8">
                     <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
-                    <p class="text-gray-400">Log in to your Sdel account</p>
+                    <p class="text-gray-400">Login to your Sdel Runner account</p>
                 </div>
                 
                 <!-- Messages -->
@@ -74,7 +59,7 @@
                         <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
                         <input type="email" id="email" required
                             class="w-full px-4 py-3 rounded-lg form-input text-white placeholder-gray-500"
-                            placeholder="john@example.com">
+                            placeholder="runner@example.com">
                     </div>
                     
                     <div>
@@ -100,28 +85,13 @@
                         </div>
                     </button>
                 </form>
-                
-                <div class="mt-6 text-center">
-                    <p class="text-gray-400">
-                        Don't have an account? 
-                        <a href="signup.html" class="text-orange-500 font-semibold hover:underline">Sign Up</a>
-                    </p>
-                </div>
             </div>
 
-            <!-- Platform Stats -->
-            <div class="mt-8 grid grid-cols-3 gap-4 text-center">
-                <div class="bg-gray-900 rounded-xl p-4">
-                    <div class="text-xl font-bold text-orange-500" id="users-count">0</div>
-                    <p class="text-xs text-gray-400">Active Users</p>
-                </div>
-                <div class="bg-gray-900 rounded-xl p-4">
-                    <div class="text-xl font-bold text-green-500" id="deliveries-count">0</div>
-                    <p class="text-xs text-gray-400">Deliveries</p>
-                </div>
-                <div class="bg-gray-900 rounded-xl p-4">
-                    <div class="text-xl font-bold text-blue-500" id="runners-count">0</div>
-                    <p class="text-xs text-gray-400">Runners</p>
+            <!-- Only Runners Count – Centered at Bottom -->
+            <div class="mt-12 text-center">
+                <div class="inline-block bg-gray-900 rounded-2xl px-10 py-6 border border-gray-800">
+                    <div class="text-4xl font-bold text-orange-500" id="runners-count">0</div>
+                    <p class="text-lg text-gray-400 mt-2">Active Runners Online</p>
                 </div>
             </div>
         </div>
@@ -148,30 +118,31 @@
             }
         }
 
-        // Load stats
-        async function loadPlatformStats() {
+        // Load only runners count
+        async function loadRunnersCount() {
             try {
-                const { count: users } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-                const { count: deliveries } = await supabase.from('requests').select('*', { count: 'exact', head: true }).eq('status', 'completed');
-                const { count: runners } = await supabase.from('runners').select('*', { count: 'exact', head: true }).eq('is_verified', true);
+                const { count } = await supabase
+                    .from('runners')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_verified', true);
 
-                document.getElementById('users-count').textContent = (users || 0).toLocaleString();
-                document.getElementById('deliveries-count').textContent = (deliveries || 0).toLocaleString();
-                document.getElementById('runners-count').textContent = (runners || 0).toLocaleString();
-            } catch (err) { console.error(err); }
+                document.getElementById('runners-count').textContent = count || 0;
+            } catch (err) {
+                console.error('Error loading runners:', err);
+            }
         }
 
-        // Show message
-        function showMessage(msg, type = 'error') {
+        // Show error message
+        function showMessage(msg) {
             const container = document.getElementById('message-container');
             const content = document.getElementById('message-content');
             content.textContent = msg;
-            content.className = type === 'error' ? 'p-4 rounded-lg error-message text-red-400' : 'p-4 rounded-lg success-message text-green-400';
+            content.className = 'p-4 rounded-lg error-message text-red-400';
             container.classList.remove('hidden');
-            setTimeout(() => container.classList.add('hidden'), 5000);
+            setTimeout(() => container.classList.add('hidden'), 6000);
         }
 
-        // Login handler
+        // Login handler – STRICT RUNNER-ONLY CHECK
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -179,28 +150,37 @@
             const spinner = document.getElementById('btn-spinner');
 
             btn.disabled = true;
-            text.textContent = 'Logging In...';
+            text.textContent = 'Checking...';
             spinner.classList.remove('hidden');
 
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({
-                    email: document.getElementById('email').value,
+                    email: document.getElementById('email').value.trim(),
                     password: document.getElementById('password').value
                 });
 
                 if (error) throw error;
 
-                // Optional: Check role here if you want runner-only login
-                // const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-                // if (profile?.role !== 'runner') throw new Error('Only runners can use this login');
+                // CRITICAL: Check if user is a verified runner
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
 
-                showMessage('Login successful! Redirecting...', 'success');
+                if (profileError || profile?.role !== 'runner') {
+                    await supabase.auth.signOut();
+                    throw new Error('Invalid credentials. Only registered runners can log in here.');
+                }
+
+                // Only real runners reach here
+                showMessage('Login successful! Welcome back, Runner', 'success');
                 setTimeout(() => {
-                    window.location.href = 'runner.html';  // Change to your runner dashboard
+                    window.location.href = 'runner.html';  // Your runner dashboard
                 }, 1200);
 
             } catch (err) {
-                showMessage(err.message || 'Login failed. Please try again.');
+                showMessage(err.message || 'Invalid credentials');
             } finally {
                 btn.disabled = false;
                 text.textContent = 'Log In';
@@ -211,7 +191,8 @@
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             createStars();
-            loadPlatformStats();
+            loadRunnersCount();
+            setInterval(loadRunnersCount, 30000); // Refresh every 30s
             lucide.createIcons();
         });
     </script>
