@@ -3,88 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Runner – SDEL</title>
+  <title>Runner • SDEL</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    body { margin: 0; overflow-x: hidden; background: #000; }
-    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-    .star { position: absolute; background: white; border-radius: 50%; animation: fall linear forwards; }
-    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
-    .badge { @apply absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center; }
+    body { margin:0; overflow-x:hidden; background:#000; }
+    .stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .star { position:absolute; background:#fff; border-radius:50%; animation:fall linear forwards; }
+    @keyframes fall { to { transform:translateY(100vh) rotate(360deg); opacity:0; } }
+    .badge { @apply absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center; }
   </style>
 </head>
-<body class="min-h-screen bg-black text-white relative">
+<body class="min-h-screen text-white relative">
 
   <div class="stars" id="stars"></div>
 
-  <!-- NAVBAR -->
-  <header class="fixed top-0 inset-x-0 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 z-50 flex items-center justify-between px-6 py-4">
-    <div class="flex items-center gap-6">
-      <!-- Hamburger -->
-      <button id="hamburger" class="text-3xl focus:outline-none">Menu</button>
-      <h1 class="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
-        SDEL Runner
-      </h1>
-    </div>
+  <!-- TOP NAVBAR – Clean IG Style -->
+  <header class="fixed top-0 inset-x-0 bg-black/80 backdrop-blur-xl border-b border-gray-800 z-50 flex items-center justify-between px-5 py-4">
+    <!-- Left: Hamburger -->
+    <button id="hamburger" class="text-3xl">Menu</button>
 
+    <!-- Center: Logo -->
+    <h1 class="text-2xl font-black bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+      SDEL Runner
+    </h1>
+
+    <!-- Right: Bell + Logout -->
     <div class="flex items-center gap-6">
-      <!-- Bell Icon with Badge -->
       <button id="bellBtn" class="relative text-3xl">
         Notification
         <span id="notifBadge" class="badge hidden">0</span>
       </button>
-      <button onclick="supabase.auth.signOut().then(()=>location.href='login.html')" class="px-6 py-3 bg-red-600 rounded-xl font-bold hover:bg-red-700">
+      <button onclick="supabase.auth.signOut().then(()=>location.href='login.html')" 
+              class="px-5 py-2 bg-red-600 rounded-full font-bold text-sm hover:bg-red-700 transition">
         Logout
       </button>
     </div>
   </header>
 
-  <!-- Sliding Sidebar (same as admin) -->
-  <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-gray-900/95 backdrop-blur border-r border-gray-800 transform -translate-x-full transition z-40 pt-20">
-    <nav class="px-4 space-y-2">
-      <a href="runner.html" class="block px-6 py-4 rounded-xl bg-green-600 font-bold">Dashboard</a>
-      <a href="#" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">My Deliveries</a>
-      <a href="#" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Earnings</a>
-      <a href="#" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Withdraw</a>
-      <a href="#" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Support</a>
+  <!-- Sliding Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-black/95 backdrop-blur border-r border-gray-800 transform -translate-x-full transition z-40 pt-20">
+    <nav class="px-5 space-y-3">
+      <a href="runner.html" class="block px-6 py-4 rounded-2xl bg-emerald-600 font-bold text-lg">Dashboard</a>
+      <a href="#" class="block px-6 py-4 rounded-2xl hover:bg-gray-900 font-medium">My Deliveries</a>
+      <a href="#" class="block px-6 py-4 rounded-2xl hover:bg-gray-900 font-medium">Earnings</a>
+      <a href="#" class="block px-6 py-4 rounded-2xl hover:bg-gray-900 font-medium">Withdraw</a>
+      <a href="#" class="block px-6 py-4 rounded-2xl hover:bg-gray-900 font-medium">Support</a>
     </nav>
   </aside>
   <div id="overlay" class="fixed inset-0 bg-black/70 z-30 hidden" onclick="closeMenu()"></div>
 
   <!-- Notification Dropdown -->
-  <div id="notifDropdown" class="fixed top-20 right-6 w-80 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-5 hidden z-50 max-h-96 overflow-y-auto">
-    <h3 class="font-bold text-lg mb-4">Messages from Admin</h3>
+  <div id="notifDropdown" class="fixed top-20 right-4 w-80 bg-gray-900/95 backdrop-blur border border-gray-800 rounded-3xl shadow-2xl p-5 hidden z-50 max-h-96 overflow-y-auto">
+    <h3 class="font-bold text-lg mb-4">Notifications</h3>
     <div id="notifList" class="space-y-3 text-sm">
       <p class="text-gray-500 italic">No new messages</p>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <main class="pt-24 px-6 pb-12 max-w-6xl mx-auto z-10 relative">
+  <!-- MAIN CONTENT -->
+  <main class="pt-24 px-5 pb-12 max-w-6xl mx-auto z-10 relative">
     <div class="text-center mb-10">
-      <h2 class="text-4xl font-black mb-4">Welcome, <span id="runnerName">Runner</span>!</h2>
-      <div class="flex justify-center gap-10 text-lg">
-        <div><strong class="text-green-400" id="totalEarnings">₹0</strong> Earnings</div>
-        <div><strong class="text-blue-400" id="totalDelivered">0</strong> Delivered</div>
-        <div><strong class="text-red-400" id="penaltyCount">0</strong> Penalties</div>
+      <h2 class="text-4xl font-black mb-3">Hey, <span id="runnerName">Runner</span>!</h2>
+      <div class="flex justify-center gap-10 text-lg font-medium">
+        <div><span class="text-emerald-400 text-2xl font-bold" id="totalEarnings">₦0</span><br>Earnings</div>
+        <div><span class="text-cyan-400 text-2xl font-bold" id="totalDelivered">0</span><br>Delivered</div>
+        <div><span class="text-red-400 text-2xl font-bold" id="penaltyCount">0</span><br>Penalties</div>
       </div>
     </div>
 
-    <h3 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-transparent">
+    <h3 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
       Available Orders
     </h3>
 
-    <div id="ordersContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7">
+    <div id="ordersContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <!-- Orders load here -->
     </div>
 
-    <div id="empty" class="text-center py-20 text-gray-500 text-2xl hidden">
-      No orders available right now
-    </div>
+    <p id="empty" class="text-center py-20 text-gray-500 text-xl hidden">
+      No orders right now. Relax!
+    </p>
   </main>
 
   <script>
@@ -96,18 +98,17 @@
     let currentRunnerId = null;
 
     // Falling stars
-    const stars = document.getElementById('stars');
     setInterval(() => {
       const s = document.createElement('div');
       s.className = 'star';
-      s.style.width = s.style.height = Math.random() * 4 + 'px';
-      s.style.left = Math.random() * 100 + 'vw';
-      s.style.animationDuration = Math.random() * 4 + 3 + 's';
-      stars.appendChild(s);
-      setTimeout(() => s.remove(), 8000);
+      s.style.width = s.style.height = Math.random()*3 + 2 + 'px';
+      s.style.left = Math.random()*100 + 'vw';
+      s.style.animationDuration = Math.random()*3 + 3 + 's';
+      document.getElementById('stars').appendChild(s);
+      setTimeout(() => s.remove(), 7000);
     }, 200);
 
-    // Hamburger & Bell
+    // Hamburger + Bell
     document.getElementById('hamburger').onclick = () => {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
       document.getElementById('overlay').classList.toggle('hidden');
@@ -116,76 +117,82 @@
       document.getElementById('sidebar').classList.add('-translate-x-full');
       document.getElementById('overlay').classList.add('hidden');
     }
-
     document.getElementById('bellBtn').onclick = () => {
       document.getElementById('notifDropdown').classList.toggle('hidden');
+      if (!document.getElementById('notifDropdown').classList.contains('hidden')) {
+        markNotificationsRead();
+      }
     };
 
-    // Load runner + notifications count
-    async function initRunner() {
+    // Init
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return location.href = 'login.html';
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile || !profile.full_name) {
-        alert('Access denied');
-        return location.href = 'login.html';
-      }
+      const { data: profile } = await supabase.from('profiles').select('id, full_name').eq('id', user.id).single();
+      if (!profile) return location.href = 'login.html';
 
       currentRunnerId = profile.id;
-      document.getElementById('runnerName').textContent = profile.full_name;
+      document.getElementById('runnerName').textContent = profile.full_name.split(' ')[0];
 
       loadStats();
       loadOrders();
-      loadNotificationCount(); // Real count from DB
+      loadNotifications();
       setupRealtime();
-    }
-
-    async function loadNotificationCount() {
-      const { count } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('runner_id', currentRunnerId)
-        .eq('read', false);
-
-      const badge = document.getElementById('notifBadge');
-      if (count > 0) {
-        badge.textContent = count > 9 ? '9+' : count;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
     }
 
     async function loadStats() {
       const { data } = await supabase.from('runners').select('total_earnings, total_deliveries').eq('id', currentRunnerId).single();
       if (data) {
-        document.getElementById('totalEarnings').textContent = '₹' + (data.total_earnings || 0);
+        document.getElementById('totalEarnings').textContent = '₦' + Number(data.total_earnings || 0).toLocaleString();
         document.getElementById('totalDelivered').textContent = data.total_deliveries || 0;
       }
-
-      const { count: penalties } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('runner_id', currentRunnerId)
-        .eq('status', 'returned');
-      document.getElementById('penaltyCount').textContent = penalties || 0;
+      const { count } = await supabase.from('orders').select('*',{count:'exact',head:true}).eq('runner_id', currentRunnerId).eq('status','returned');
+      document.getElementById('penaltyCount').textContent = count || 0;
     }
 
-    // Rest of your order functions (accept, reject, delivered, returned) stay exactly the same
-    // ... (same as previous version)
+    async function loadNotifications() {
+      const { data, count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact' })
+        .eq('runner_id', currentRunnerId)
+        .order('created_at', { ascending: false });
 
-    // Start everything
-    initRunner();
-    setInterval(() => {
-      loadOrders();
-      loadNotificationCount();
-    }, 8000);
+      const badge = document.getElementById('notifBadge');
+      const list = document.getElementById('notifList');
+      list.innerHTML = '';
+
+      if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.classList.remove('hidden');
+        data.forEach(n => {
+          const div = document.createElement('div');
+          div.className = 'p-3 bg-gray-800/70 rounded-2xl';
+          div.innerHTML = `<strong>${n.title}</strong><p class="text-xs text-gray-400 mt-1">${n.message}</p>`;
+          list.appendChild(div);
+        });
+      } else {
+        list.innerHTML = '<p class="text-gray-500 italic">All caught up!</p>';
+        badge.classList.add('hidden');
+      }
+    }
+
+    async function markNotificationsRead() {
+      await supabase.from('notifications').update({ read: true }).eq('runner_id', currentRunnerId).eq('read', false);
+      loadNotifications();
+    }
+
+    // Keep your loadOrders(), acceptOrder(), etc. from previous version here
+    // ... (same logic, just change ₹ → ₦ in display)
+
+    function setupRealtime() {
+      supabase.channel('public').on('postgres_changes', { event: '*', schema: 'public' }, () => {
+        loadOrders(); loadStats(); loadNotifications();
+      }).subscribe();
+    }
+
+    init();
+    setInterval(() => { loadOrders(); loadNotifications(); }, 10000);
   </script>
 </body>
 </html>
