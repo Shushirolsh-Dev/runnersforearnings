@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Runner Login • SDEL</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { margin:0; overflow:hidden; background:#000; height:100vh; }
+    .stars { position:fixed; inset:0; pointer-events:none; z-index:1; }
+    .star { position:absolute; background:#fff; border-radius:50%; animation:fall linear forwards; }
+    @keyframes fall { to { transform:translateY(100vh) rotate(360deg); opacity:0; } }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen relative">
+
+  <!-- Falling Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Login Card -->
+  <div class="relative z-10 bg-gray-900/90 backdrop-blur-xl rounded-3xl p-10 w-full max-w-md border border-gray-800 shadow-2xl">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-black bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+        SDEL Runner
+      </h1>
+      <p class="text-gray-400 mt-3">Login to start delivering</p>
+    </div>
+
+    <form id="loginForm" class="space-y-6">
+      <input 
+        type="text" 
+        id="phone" 
+        placeholder="Phone Number" 
+        required
+        class="w-full px-6 py-5 bg-gray-800/70 rounded-2xl border border-gray-700 focus:border-emerald-500 outline-none text-lg"
+      />
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="Password" 
+        required
+        class="w-full px-6 py-5 bg-gray-800/70 rounded-2xl border border-gray-700 focus:border-emerald-500 outline-none text-lg"
+      />
+
+      <button 
+        type="submit"
+        class="w-full py-5 bg-gradient-to-r from-emerald-500 to-cyan-600 rounded-2xl font-bold text-xl hover:scale-105 transition transform">
+        Login as Runner
+      </button>
+    </form>
+
+    <div class="text-center mt-6">
+      <p class="text-gray-500 text-sm">Only registered runners can access</p>
+    </div>
+
+    <div id="error" class="mt-5 text-red-400 text-center font-medium hidden"></div>
+    <div id="loading" class="mt-5 text-center text-emerald-400 hidden">Checking credentials...</div>
+  </div>
+
+  <script>
+    // === YOUR SUPABASE DETAILS ===
+    const supabaseUrl = 'https://YOUR-PROJECT.supabase.co';
+    const supabaseKey = 'your-anon-key-here';
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Falling stars
+    setInterval(() => {
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.width = s.style.height = Math.random()*3 + 2 + 'px';
+      s.style.left = Math.random()*100 + 'vw';
+      s.style.top = '-5px';
+      s.style.animationDuration = Math.random()*3 + 3 + 's';
+      document.getElementById('stars').appendChild(s);
+      setTimeout(() => s.remove(), 7000);
+    }, 180);
+
+    // Login Form
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('error');
+      const loadingEl = document.getElementById('loading');
+
+      errorEl.classList.add('hidden');
+      loadingEl.classList.remove('hidden');
+
+      try {
+        // Step 1: Sign in with phone + password
+        const { data, error } = await supabase.auth.signInWithPassword({
+          phone,
+          password
+        });
+
+        if (error) throw error;
+
+        // Step 2: Check if user is a RUNNER
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError || !profile) throw new Error('Profile not found');
+
+        if (profile.role !== 'runner') {
+          await supabase.auth.signOut();
+          throw new Error('Access denied. Only runners can login here.');
+        }
+
+        // Success → Go to runner dashboard
+        loadingEl.textContent = 'Welcome back!';
+        setTimeout(() => {
+          location.href = 'runner.html';
+        }, 800);
+
+      } catch (err) {
+        loadingEl.classList.add('hidden');
+        errorEl.textContent = err.message || 'Login failed';
+        errorEl.classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>
