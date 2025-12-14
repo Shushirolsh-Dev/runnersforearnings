@@ -1,195 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Account – SDEL Admin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runner Login - Sdel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body { margin: 0; overflow-x: hidden; background: #000; }
-    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-    .star { position: absolute; background: white; border-radius: 50%; animation: fall linear forwards; }
-    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
-  </style>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #000; color: white; overflow-x: hidden; position: relative; }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .star { position: absolute; background-color: white; border-radius: 50%; animation: fall linear infinite; }
+        @keyframes fall { to { transform: translateY(100vh); } }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(255,102,0,0.2); }
+        .btn-primary { background-color: #FF6600; transition: all 0.3s ease; }
+        .btn-primary:hover { background-color: #e55c00; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,102,0,0.4); }
+        .form-input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #FF6600;
+            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+            outline: none;
+        }
+        .error-message { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .success-message { background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+    </style>
 </head>
-<body class="min-h-screen bg-black text-white relative">
-
-  <div class="stars" id="stars"></div>
-
-  <!-- Header -->
-  <header class="fixed top-0 inset-x-0 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 z-50 flex items-center justify-between px-6 py-4">
-    <h1 class="text-2xl font-bold">SDEL Admin</h1>
-    <button id="hamburger" class="text-xl font-bold focus:outline-none">Menu</button>
-  </header>
-
-  <!-- Sidebar -->
-  <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-gray-900/95 backdrop-blur border-r border-gray-800 transform -translate-x-full transition z-40 pt-20">
-    <nav class="px-4 space-y-2">
-      <a href="index.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Dashboard</a>
-      <a href="users.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">All Users</a>
-      <a href="runners.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">All Runners</a>
-      <a href="orders.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Orders</a>
-      <a href="uploads.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Pending Uploads</a>
-      <a href="withdrawals.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Withdrawals</a>
-      <a href="broadcast.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Broadcast</a>
-      <a href="control.html" class="block px-6 py-4 rounded-xl hover:bg-gray-800 font-medium">Site Control</a>
-      <a href="create-account.html" class="block px-6 py-4 rounded-xl bg-gradient-to-r from-orange-600 to-pink-600 font-bold text-white">Create Account</a>
+<body>
+    <!-- Stars Background -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Navigation -->
+    <nav class="flex justify-center items-center p-6 bg-black bg-opacity-80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-800">
+        <a href="index.html" class="text-2xl font-bold text-white">Sdel</a>
     </nav>
-  </aside>
-  <div id="overlay" class="fixed inset-0 bg-black/70 z-30 hidden" onclick="closeMenu()"></div>
+    
+    <!-- Login Section -->
+    <section class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="container max-w-md mx-auto">
+            <div class="bg-gray-900 rounded-2xl p-8 card-hover border border-gray-800">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+                    <p class="text-gray-400">Login to your Sdel Runner account</p>
+                </div>
+                
+                <!-- Messages -->
+                <div id="message-container" class="mb-6 hidden">
+                    <div id="message-content" class="p-4 rounded-lg text-center"></div>
+                </div>
+                
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                        <input type="email" id="email" required
+                            class="w-full px-4 py-3 rounded-lg form-input text-white placeholder-gray-500"
+                            placeholder="runner@example.com">
+                    </div>
+                    
+                    <!-- PASSWORD FIELD WITH EYE ICON -->
+                    <div class="relative">
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="password" required
+                            class="w-full px-4 py-3 pr-12 rounded-lg form-input text-white placeholder-gray-500"
+                            placeholder="••••••••">
+                        <button type="button" id="togglePassword"
+                            class="absolute right-3 top-10 text-orange-500 hover:text-orange-400 transition">
+                            <i data-lucide="eye" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember" class="w-4 h-4 rounded text-orange-500 focus:ring-orange-500">
+                            <label for="remember" class="ml-2 text-sm text-gray-300">Remember me</label>
+                        </div>
+                        <a href="forgotpassword.html" class="text-sm text-orange-500 hover:underline">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" id="submit-btn"
+                        class="w-full px-6 py-3 btn-primary rounded-lg text-white font-semibold flex items-center justify-center">
+                        <span id="btn-text">Log In</span>
+                        <div id="btn-spinner" class="hidden ml-2">
+                            <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    </button>
+                </form>
+            </div>
 
-  <!-- Main Content -->
-  <main class="pt-24 px-6 pb-12 max-w-4xl mx-auto z-10 relative">
-    <h2 class="text-4xl font-bold text-center mb-10 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-transparent">
-      Create Runner or Admin Account
-    </h2>
-
-    <div class="bg-gray-900/80 backdrop-blur-xl rounded-3xl p-8 border border-gray-800 shadow-2xl">
-      <form id="create-form" class="space-y-6">
-        <div>
-          <label class="block text-xl font-bold mb-2">Account Type</label>
-          <select id="account-type" class="w-full px-4 py-3 bg-gray-800 rounded-lg border border-gray-700 focus:border-orange-500 outline-none">
-            <option value="runner">Runner</option>
-            <option value="admin">Admin</option>
-          </select>
+            <!-- Only Runners Count – Centered at Bottom -->
+            <div class="mt-12 text-center">
+                <div class="inline-block bg-gray-900 rounded-2xl px-10 py-6 border border-gray-800">
+                    <div class="text-4xl font-bold text-orange-500" id="runners-count">0</div>
+                    <p class="text-lg text-gray-400 mt-2">Active Runners Online</p>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div>
-          <label class="block text-xl font-bold mb-2">Full Name</label>
-          <input type="text" id="name" required class="w-full px-4 py-3 bg-gray-800 rounded-lg border border-gray-700 focus:border-orange-500 outline-none" placeholder="John Doe">
-        </div>
+    <script>
+        const SUPABASE_URL = 'https://lfjvnyeirxdvwxvzyocc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmanZueWVpcnhkdnd4dnp5b2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ5NTI3MTUsImV4cCI6MjA4MDUyODcxNX0.JPekpIORM0jkTlfhjcCrwczf7wzkIT7csClSYJZyd5A';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        <div>
-          <label class="block text-xl font-bold mb-2">Email</label>
-          <input type="email" id="email" required class="w-full px-4 py-3 bg-gray-800 rounded-lg border border-gray-700 focus:border-orange-500 outline-none" placeholder="john@example.com">
-        </div>
-
-        <div>
-          <label class="block text-xl font-bold mb-2">Phone (Optional)</label>
-          <input type="text" id="phone" class="w-full px-4 py-3 bg-gray-800 rounded-lg border border-gray-700 focus:border-orange-500 outline-none" placeholder="+234...">
-        </div>
-
-        <div>
-          <label class="block text-xl font-bold mb-2">Temporary Password</label>
-          <input type="text" id="password" required class="w-full px-4 py-3 bg-gray-800 rounded-lg border border-gray-700 focus:border-orange-500 outline-none" value="temp1234" placeholder="Set a temporary password">
-          <p class="text-sm text-gray-400 mt-2">User will be prompted to change it on first login</p>
-        </div>
-
-        <button type="submit" class="w-full py-4 bg-gradient-to-r from-orange-600 to-pink-600 rounded-2xl font-bold text-xl hover:scale-105 transition transform">
-          Create Account
-        </button>
-      </form>
-
-      <div id="message" class="mt-6 p-4 rounded-lg hidden text-center text-lg"></div>
-    </div>
-  </main>
-
-  <script>
-    // Menu toggle
-    document.getElementById('hamburger').onclick = () => {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
-      document.getElementById('overlay').classList.toggle('hidden');
-    };
-    function closeMenu() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('overlay').classList.add('hidden');
-    }
-
-    // Falling stars
-    const starsContainer = document.getElementById('stars');
-    setInterval(() => {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      star.style.width = star.style.height = Math.random() * 4 + 'px';
-      star.style.left = Math.random() * 100 + 'vw';
-      star.style.animationDuration = Math.random() * 4 + 3 + 's';
-      starsContainer.appendChild(star);
-      setTimeout(() => star.remove(), 8000);
-    }, 200);
-
-    // Supabase - SERVICE_ROLE KEY
-    const SUPABASE_URL = 'https://lfjvnyeirxdvwxvzyocc.supabase.co';
-    const SERVICE_ROLE_KEY = 'YOUR_SERVICE_ROLE_KEY_HERE'; // ← Replace with your real service_role key
-    const supabase = window.supabase.createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-
-    const SUPER_ADMIN_UUID = '95bd3e62-87ba-49e3-a19a-b06fb4101e7b';
-
-    async function checkAdmin() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session || session.user.id !== SUPER_ADMIN_UUID) {
-        alert('Access denied. Super admin only.');
-        window.location.href = 'login.html';
-      }
-    }
-
-    document.getElementById('create-form').onsubmit = async (e) => {
-      e.preventDefault();
-
-      const type = document.getElementById('account-type').value;
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const phone = document.getElementById('phone').value.trim();
-      const password = document.getElementById('password').value;
-
-      const msg = document.getElementById('message');
-      msg.classList.add('hidden');
-
-      if (!name || !email || !password) {
-        msg.textContent = 'Please fill name, email, and password.';
-        msg.className = 'mt-6 p-4 rounded-lg bg-red-900/50 text-red-300';
-        msg.classList.remove('hidden');
-        return;
-      }
-
-      try {
-        // Create user in Auth
-        const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-          email: email,
-          password: password,
-          email_confirm: true
-        });
-
-        if (authError) throw authError;
-
-        // Insert into table (minimal safe fields)
-        const table = type === 'runner' ? 'runners' : 'admins';
-        const insertData = {
-          id: authUser.user.id,
-          name: name
-        };
-
-        if (phone) insertData.phone = phone;
-
-        const { error: insertError } = await supabase.from(table).insert(insertData);
-
-        if (insertError) {
-          // Clean up if insert fails
-          await supabase.auth.admin.deleteUser(authUser.user.id);
-          throw insertError;
+        // Create falling stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 2 + 1;
+                star.style.width = star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                star.style.animationDuration = `${Math.random() * 100 + 50}s`;
+                star.style.animationDelay = `${Math.random() * 10}s`;
+                starsContainer.appendChild(star);
+            }
         }
 
-        msg.textContent = `${type === 'runner' ? 'Runner' : 'Admin'} account created successfully! Ready to log in.`;
-        msg.className = 'mt-6 p-4 rounded-lg bg-green-900/50 text-green-300';
-        msg.classList.remove('hidden');
+        // Load runners count from 'runners' table
+        async function loadRunnersCount() {
+            try {
+                const { count, error } = await supabase
+                    .from('runners')
+                    .select('*', { count: 'exact', head: true });
 
-        e.target.reset();
-        document.getElementById('password').value = 'temp1234';
+                if (!error && count !== null) {
+                    document.getElementById('runners-count').textContent = count;
+                }
+            } catch (err) {
+                console.error('Error loading runners count:', err);
+            }
+        }
 
-      } catch (err) {
-        console.error('Create error:', err);
-        msg.textContent = 'Error: ' + (err.message || 'Failed to create account');
-        msg.className = 'mt-6 p-4 rounded-lg bg-red-900/50 text-red-300';
-        msg.classList.remove('hidden');
-      }
-    };
+        // Show message (error or success)
+        function showMessage(msg, type = 'error') {
+            const container = document.getElementById('message-container');
+            const content = document.getElementById('message-content');
+            content.textContent = msg;
+            content.className = type === 'success' 
+                ? 'p-4 rounded-lg success-message text-green-400' 
+                : 'p-4 rounded-lg error-message text-red-400';
+            container.classList.remove('hidden');
+            setTimeout(() => container.classList.add('hidden'), 5000);
+        }
 
-    document.addEventListener('DOMContentLoaded', checkAdmin);
-  </script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        });
+
+        // Login handler – Safe + Instant Redirect
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const text = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
+
+            btn.disabled = true;
+            text.textContent = 'Logging in...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value
+                });
+
+                if (authError) throw authError;
+
+                // Safe check for runner in 'runners' table
+                const { data: runner, error: runnerError } = await supabase
+                    .from('runners')
+                    .select('id, name')
+                    .eq('id', authData.user.id)
+                    .maybeSingle();  // Won't error if no row
+
+                if (runnerError) {
+                    console.error('Runner check error:', runnerError);
+                    throw new Error('Database error. Try again.');
+                }
+
+                if (!runner) {
+                    await supabase.auth.signOut();
+                    throw new Error('Access denied. This account is not registered as a runner.');
+                }
+
+                // Success - instant redirect
+                showMessage('Login successful! Redirecting...', 'success');
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                showMessage(err.message || 'Invalid credentials');
+            } finally {
+                btn.disabled = false;
+                text.textContent = 'Log In';
+                spinner.classList.add('hidden');
+            }
+        };
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            loadRunnersCount();
+            setInterval(loadRunnersCount, 30000);
+            lucide.createIcons();
+        });
+    </script>
 </body>
 </html>
