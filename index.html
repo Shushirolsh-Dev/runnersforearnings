@@ -29,6 +29,7 @@
             outline: none;
         }
         .error-message { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .success-message { background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
     </style>
 </head>
 <body>
@@ -123,26 +124,29 @@
             }
         }
 
-        // Load only runners count
+        // Load runners count from 'runners' table (verified runners)
         async function loadRunnersCount() {
             try {
-                const { count } = await supabase
+                const { count, error } = await supabase
                     .from('runners')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('is_verified', true);
+                    .select('*', { count: 'exact', head: true });
 
-                document.getElementById('runners-count').textContent = count || 0;
+                if (!error) {
+                    document.getElementById('runners-count').textContent = count || 0;
+                }
             } catch (err) {
-                console.error('Error loading runners:', err);
+                console.error('Error loading runners count:', err);
             }
         }
 
-        // Show error message
-        function showMessage(msg) {
+        // Show message (error or success)
+        function showMessage(msg, type = 'error') {
             const container = document.getElementById('message-container');
             const content = document.getElementById('message-content');
             content.textContent = msg;
-            content.className = 'p-4 rounded-lg error-message text-red-400';
+            content.className = type === 'success' 
+                ? 'p-4 rounded-lg success-message text-green-400' 
+                : 'p-4 rounded-lg error-message text-red-400';
             container.classList.remove('hidden');
             setTimeout(() => container.classList.add('hidden'), 6000);
         }
@@ -161,7 +165,7 @@
             lucide.createIcons();
         });
 
-        // Login handler – STRICT RUNNER-ONLY CHECK
+        // Login handler – Check if user exists in 'runners' table
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -180,21 +184,22 @@
 
                 if (error) throw error;
 
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('role')
+                // Check if user exists in runners table
+                const { data: runner, error: runnerError } = await supabase
+                    .from('runners')
+                    .select('id, name')
                     .eq('id', data.user.id)
                     .single();
 
-                if (profileError || profile?.role !== 'runner') {
+                if (runnerError || !runner) {
                     await supabase.auth.signOut();
-                    throw new Error('Invalid credentials. Only registered runners can log in here.');
+                    throw new Error('Access denied. This account is not registered as a runner.');
                 }
 
-                showMessage('Login successful! Welcome back, Runner', 'success');
+                showMessage('Login successful! Welcome back, ' + (runner.name || 'Runner'), 'success');
                 setTimeout(() => {
-                    window.location.href = 'runnerdashboard.html';
-                }, 1200);
+                    window.location.href = 'dashboard.html';  // Redirect to main runner dashboard
+                }, 1500);
 
             } catch (err) {
                 showMessage(err.message || 'Invalid credentials');
