@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runner Dashboard - Sdel Campus Delivery</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #000;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Stars Background Animation */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255,102,0,0.2);
+        }
+        
+        .btn-primary {
+            background-color: #FF6600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e55c00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,102,0,0.4);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid #FF6600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255,102,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: rgba(255,102,0,0.1);
+            border-left: 4px solid #FF6600;
+        }
+      .stats-card {
+            background: linear-gradient(135deg, rgba(255,102,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        }
+        
+        .loading-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars Background -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Navigation -->
+    <nav class="flex justify-between items-center p-6 bg-black bg-opacity-80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-800">
+        <div class="flex items-center">
+            <a href="index.html" class="flex items-center">
+                <span class="text-2xl font-bold text-white">Sdel</span>
+                <span class="ml-2 text-orange-500 font-semibold">Campus Delivery</span>
+            </a>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold" id="user-avatar">
+                    U
+                </div>
+                <span class="text-white" id="username">Runner</span>
+            </div>
+            <button id="logout-btn" class="px-4 py-2 btn-secondary rounded-lg text-white">
+    Log Out
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar -->
+            <div class="lg:w-1/4">
+                <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+                    <h2 class="text-xl font-bold mb-6">Runner Menu</h2>
+                    <div class="space-y-2">
+                        <a href="#overview" class="sidebar-item active flex items-center space-x-3 p-3 rounded-lg">
+                            <i data-lucide="layout-dashboard" width="20" height="20"></i>
+                            <span>Available Deliveries</span>
+                        </a>
+                        <a href="my-deliveries.html" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
+                            <i data-lucide="package" width="20" height="20"></i>
+                            <span>My Deliveries</span>
+                        </a>
+                        <a href="wallet.html" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
+                            <i data-lucide="wallet" width="20" height="20"></i>
+                            <span>Wallet</span>
+                        </a>
+                        <a href="profile.html" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
+                            <i data-lucide="user" width="20" height="20"></i>
+                            <span>Profile</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Quick Stats -->
+                <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800 mt-6">
+                    <h3 class="text-lg font-bold mb-4">Runner Stats</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Total Deliveries</span>
+                            <span class="font-bold text-orange-500" id="total-deliveries">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Active</span>
+                            <span class="font-bold text-blue-500" id="active-deliveries">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Earnings</span>
+                            <span class="font-bold text-green-500" id="total-earnings">₦0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Unaccepts</span>
+                            <span class="font-bold text-red-500" id="unaccept-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Main Content Area -->
+            <div class="lg:w-3/4">
+                <!-- Available Deliveries -->
+                <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Available Deliveries</h2>
+                        <button onclick="loadAvailableDeliveries()" class="px-4 py-2 btn-primary rounded-lg text-white text-sm">Refresh</button>
+                    </div>
+                    
+                    <div id="available-deliveries">
+                        <div class="space-y-4">
+                            <div class="loading-pulse h-32 bg-gray-800 rounded-lg"></div>
+                            <div class="loading-pulse h-32 bg-gray-800 rounded-lg"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://lfjvnyeirxdvwxvzyocc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmanZueWVpcnhkdnd4dnp5b2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ5NTI3MTUsImV4cCI6MjA4MDUyODcxNX0.JPekpIORM0jkTlfhjcCrwczf7wzkIT7csClSYJZyd5A';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        lucide.createIcons();
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                star.style.animationDuration = `${Math.random() * 100 + 50}s`;
+                star.style.animationDelay = `${Math.random() * 10}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        async function checkAuthAndLoadData() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadRunnerProfile(session.user.id);
+            await loadRunnerStats(session.user.id);
+            await loadAvailableDeliveries();
+        }
+
+        async function loadRunnerProfile(runnerId) {
+            const { data: profile } = await supabase.from('runners').select('name').eq('id', runnerId).single();
+            if (profile) {
+                document.getElementById('username').textContent = profile.name || 'Runner';
+                document.getElementById('user-avatar').textContent = (profile.name?.charAt(0) || 'R').toUpperCase();
+            }
+        }
+
+        async function loadRunnerStats(runnerId) {
+            const { data: stats } = await supabase.from('runners').select('total_deliveries, active_deliveries, total_earnings, unaccept_count').eq('id', runnerId).single();
+            document.getElementById('total-deliveries').textContent = stats.total_deliveries || 0;
+            document.getElementById('active-deliveries').textContent = stats.active_deliveries || 0;
+            document.getElementById('total-earnings').textContent = `₦${stats.total_earnings || 0}`;
+            document.getElementById('unaccept-count').textContent = stats.unaccept_count || 0;
+        }
+
+        async function loadAvailableDeliveries() {
+            const { data: deliveries } = await supabase
+                .from('User_uploads')
+                .select('*')
+                .eq('status', 'approved')
+                .is('runner_id', null)
+                .order('created_at', { ascending: false });
+
+            const container = document.getElementById('available-deliveries');
+            if (!deliveries || deliveries.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center">No available deliveries right now</p>';
+                return;
+            }
+
+            container.innerHTML = deliveries.map(d => `
+                <div class="bg-gray-800 rounded-lg p-4 mb-4 card-hover">
+                    <img src="${d.image_url}" alt="Item" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <h3 class="font-semibold">${d.description.substring(0, 50)}...</h3>
+                    <p class="text-gray-400 text-sm">Budget: ₦${d.budget}</p>
+                    <p class="text-gray-400 text-sm">Type: ${d.delivery_type}</p>
+                    <p class="text-gray-400 text-sm">Total: ₦${d.total_amount}</p>
+                    <button onclick="acceptDelivery('${d.id}')" class="mt-4 w-full px-4 py-2 btn-primary rounded-lg">Accept</button>
+                </div>
+            `).join('');
+        }
+
+        async function acceptDelivery(id) {
+            const { data: { session } } = await supabase.auth.getSession();
+            const runnerId = session.user.id;
+
+            const { error } = await supabase
+                .from('User_uploads')
+                .update({ runner_id: runnerId, status: 'accepted' })
+                .eq('id', id)
+                .is('runner_id', null);
+
+            if (error) {
+                alert('Error accepting: ' + error.message);
+            } else {
+                alert('Delivery accepted!');
+                loadAvailableDeliveries();
+                loadRunnerStats(runnerId);
+            }
+        }
+
+        async function unacceptDelivery(id, runnerId) {
+            const { error: unacceptError } = await supabase
+                .from('User_uploads')
+                .update({ runner_id: null, status: 'approved' })
+                .eq('id', id)
+                .eq('runner_id', runnerId);
+
+            if (unacceptError) return alert('Error unaccepting: ' + unacceptError.message);
+
+            const { error: countError } = await supabase
+                .from('runners')
+                .update({ unaccept_count: supabase.rpc('increment_unaccept') })  // Use a function or direct increment
+                .eq('id', runnerId);
+
+            if (countError) alert('Error updating unaccept count: ' + countError.message);
+            else {
+                alert('Delivery unaccepted.');
+                loadAvailableDeliveries();
+                loadRunnerStats(runnerId);
+            }
+        }
+
+        async function markDelivered(id) {
+            const { error } = await supabase
+                .from('User_uploads')
+                .update({ status: 'delivered' })
+                .eq('id', id);
+
+            if (error) alert('Error marking as delivered: ' + error.message);
+            else {
+                alert('Marked as delivered!');
+                loadRunnerStats(runnerId);
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            checkAuthAndLoadData();
+            document.getElementById('logout-btn').addEventListener('click', () => supabase.auth.signOut().then(() => location.href = 'index.html'));
+        });
+    </script>
+</body>
+</html>
